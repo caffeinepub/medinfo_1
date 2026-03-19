@@ -1,5 +1,12 @@
 import { Button } from "@/components/ui/button";
 import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -18,15 +25,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Lock, Plus, Star, Trash2 } from "lucide-react";
+import { Loader2, Lock, Plus, ShieldCheck, Star, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { Medicine } from "../backend.d";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
 import {
   useAddMedicine,
+  useClaimAdmin,
   useDeleteMedicine,
   useGetAllMedicines,
+  useHasAnyAdmin,
   useIsCallerAdmin,
   useSetFeatured,
 } from "../hooks/useQueries";
@@ -45,13 +54,15 @@ const emptyForm = (): Omit<Medicine, "id"> => ({
 });
 
 export default function AdminPage() {
-  const { identity } = useInternetIdentity();
+  const { identity, login } = useInternetIdentity();
   const isAuthenticated = !!identity;
   const { data: isAdmin, isLoading: adminLoading } = useIsCallerAdmin();
+  const { data: hasAnyAdmin, isLoading: hasAnyAdminLoading } = useHasAnyAdmin();
   const { data: medicines, isLoading: medsLoading } = useGetAllMedicines();
   const addMedicine = useAddMedicine();
   const deleteMedicine = useDeleteMedicine();
   const setFeatured = useSetFeatured();
+  const claimAdmin = useClaimAdmin();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState<Omit<Medicine, "id">>(emptyForm());
@@ -66,14 +77,21 @@ export default function AdminPage() {
         <h2 className="text-2xl font-bold text-foreground mb-2">
           Admin Access Required
         </h2>
-        <p className="text-muted-foreground">
-          Please sign in with an admin account to access this page.
+        <p className="text-muted-foreground mb-6">
+          Please sign in to access the admin panel.
         </p>
+        <Button
+          onClick={login}
+          className="bg-teal-700 hover:bg-teal-600 text-white rounded-full px-8"
+          data-ocid="admin.primary_button"
+        >
+          Sign In
+        </Button>
       </div>
     );
   }
 
-  if (adminLoading) {
+  if (adminLoading || hasAnyAdminLoading) {
     return (
       <div
         className="flex justify-center items-center min-h-[50vh]"
@@ -85,6 +103,53 @@ export default function AdminPage() {
   }
 
   if (!isAdmin) {
+    // No admin has been set up yet — allow first user to claim admin
+    if (!hasAnyAdmin) {
+      return (
+        <div
+          className="max-w-lg mx-auto px-6 py-20 flex flex-col items-center"
+          data-ocid="admin.panel"
+        >
+          <Card className="w-full border-teal-200 shadow-lg">
+            <CardHeader className="text-center pb-2">
+              <div className="flex justify-center mb-3">
+                <div className="w-16 h-16 rounded-full bg-teal-50 flex items-center justify-center">
+                  <ShieldCheck className="w-8 h-8 text-teal-600" />
+                </div>
+              </div>
+              <CardTitle className="text-2xl font-bold">Become Admin</CardTitle>
+              <CardDescription className="text-base mt-1">
+                No admin has been set up yet. As the first user, you can claim
+                admin access.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center pt-4">
+              <Button
+                onClick={async () => {
+                  try {
+                    await claimAdmin.mutateAsync();
+                    toast.success("You are now admin!");
+                  } catch {
+                    toast.error("Failed to claim admin. Please try again.");
+                  }
+                }}
+                disabled={claimAdmin.isPending}
+                className="bg-teal-700 hover:bg-teal-600 text-white rounded-full px-10 py-5 text-base font-semibold"
+                data-ocid="admin.primary_button"
+              >
+                {claimAdmin.isPending ? (
+                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                ) : (
+                  <ShieldCheck className="w-5 h-5 mr-2" />
+                )}
+                Claim Admin
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
     return (
       <div
         className="max-w-lg mx-auto px-6 py-20 text-center"

@@ -26,6 +26,7 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
+export const UserProfile = IDL.Record({ 'name' : IDL.Text });
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
@@ -33,12 +34,20 @@ export const idlService = IDL.Service({
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'deleteMedicine' : IDL.Func([IDL.Nat], [], []),
   'getAllMedicines' : IDL.Func([], [IDL.Vec(Medicine)], ['query']),
+  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getFeaturedMedicines' : IDL.Func([], [IDL.Vec(Medicine)], ['query']),
   'getMedicine' : IDL.Func([IDL.Nat], [Medicine], ['query']),
   'getMedicineByBarcode' : IDL.Func([IDL.Text], [Medicine], ['query']),
+  'getUserProfile' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(UserProfile)],
+      ['query'],
+    ),
+  'hasAnyAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'initializeSamples' : IDL.Func([], [], []),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'searchMedicines' : IDL.Func([IDL.Text], [IDL.Vec(Medicine)], ['query']),
   'setFeatured' : IDL.Func([IDL.Nat, IDL.Bool], [], []),
   'updateMedicine' : IDL.Func([IDL.Nat, Medicine], [], []),
@@ -65,6 +74,7 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
+  const UserProfile = IDL.Record({ 'name' : IDL.Text });
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
@@ -72,12 +82,20 @@ export const idlFactory = ({ IDL }) => {
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'deleteMedicine' : IDL.Func([IDL.Nat], [], []),
     'getAllMedicines' : IDL.Func([], [IDL.Vec(Medicine)], ['query']),
+    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getFeaturedMedicines' : IDL.Func([], [IDL.Vec(Medicine)], ['query']),
     'getMedicine' : IDL.Func([IDL.Nat], [Medicine], ['query']),
     'getMedicineByBarcode' : IDL.Func([IDL.Text], [Medicine], ['query']),
+    'getUserProfile' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(UserProfile)],
+        ['query'],
+      ),
+    'hasAnyAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'initializeSamples' : IDL.Func([], [], []),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'searchMedicines' : IDL.Func([IDL.Text], [IDL.Vec(Medicine)], ['query']),
     'setFeatured' : IDL.Func([IDL.Nat, IDL.Bool], [], []),
     'updateMedicine' : IDL.Func([IDL.Nat, Medicine], [], []),

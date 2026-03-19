@@ -23,6 +23,7 @@ export interface Medicine {
   'category' : string,
   'sideEffects' : string,
 }
+export interface UserProfile { 'name' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
@@ -32,12 +33,16 @@ export interface _SERVICE {
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'deleteMedicine' : ActorMethod<[bigint], undefined>,
   'getAllMedicines' : ActorMethod<[], Array<Medicine>>,
+  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getFeaturedMedicines' : ActorMethod<[], Array<Medicine>>,
   'getMedicine' : ActorMethod<[bigint], Medicine>,
   'getMedicineByBarcode' : ActorMethod<[string], Medicine>,
+  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'hasAnyAdmin' : ActorMethod<[], boolean>,
   'initializeSamples' : ActorMethod<[], undefined>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'searchMedicines' : ActorMethod<[string], Array<Medicine>>,
   'setFeatured' : ActorMethod<[bigint, boolean], undefined>,
   'updateMedicine' : ActorMethod<[bigint, Medicine], undefined>,

@@ -75,6 +75,33 @@ export function useIsCallerAdmin() {
   });
 }
 
+export function useHasAnyAdmin() {
+  const { actor, isFetching } = useActor();
+  return useQuery<boolean>({
+    queryKey: ["hasAnyAdmin"],
+    queryFn: async () => {
+      if (!actor) return true; // default safe
+      return (actor as any).hasAnyAdmin();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useClaimAdmin() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      if (!actor) throw new Error("No actor");
+      await (actor as any).claimAdmin();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["isAdmin"] });
+      queryClient.invalidateQueries({ queryKey: ["hasAnyAdmin"] });
+    },
+  });
+}
+
 export function useInitializeSamples() {
   const { actor } = useActor();
   const queryClient = useQueryClient();

@@ -1,26 +1,23 @@
 # MedInfo
 
 ## Current State
-New project with no existing application files.
+App uses the `authorization` Caffeine component. Admin check via `AccessControl.isAdmin`. No admin exists in the deployed canister, so all logged-in users see "Access Denied" on the admin page. There is no way to self-assign admin.
 
 ## Requested Changes (Diff)
 
 ### Add
-- Medicine database with detailed drug information (name, uses, dosage, side effects, warnings, category)
-- QR code / barcode scanner to identify tablets and retrieve their information
-- Search functionality to find medicines by name or category
-- Medicine detail pages with full drug information
-- Admin-only ability to add, edit, and delete medicine entries
-- Homepage with hero section, featured medicines, and how-it-works section
-- Authentication (admin login) for managing medicine data
+- `claimAdmin` backend function: if no admin exists, caller becomes admin
+- `hasAnyAdmin` backend query: returns bool so frontend knows whether to show claim button
+- "Claim Admin" UI section in AdminPage for authenticated non-admin users when no admin exists
 
 ### Modify
-- N/A (new project)
+- AdminPage: show claim button when user is logged in but not admin and no admin exists yet
 
 ### Remove
-- N/A (new project)
+- Nothing
 
 ## Implementation Plan
-1. Backend: Medicine data model with CRUD operations, search by name/code, role-based access for admin
-2. Frontend: Homepage with search bar, QR scanner page, medicine detail page, admin dashboard for medicine management
-3. Components: authorization for admin access, qr-code for tablet scanning
+1. Add `hasAnyAdmin` query and `claimAdmin` mutation to main.mo
+2. Regenerate backend bindings
+3. Add useHasAnyAdmin and useClaimAdmin hooks to useQueries
+4. Update AdminPage to show Claim Admin UI for the first-user scenario
